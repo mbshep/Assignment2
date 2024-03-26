@@ -53,14 +53,6 @@ class Language(models.Model):
         return self.name
 
 
-def display_genre(self):
-    """Create a string for the Genre. This is required to display genre in Admin."""
-    return ', '.join(genre.name for genre in self.genre.all()[:3])
-
-
-display_genre.short_description = 'Genre'
-
-
 class Book(models.Model):
     """Model representing a book (but not a specific copy of a book)."""
     title = models.CharField(max_length=200)
@@ -82,6 +74,15 @@ class Book(models.Model):
 
     language = models.ForeignKey(
         'Language', on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ['title', 'author']
+
+    def display_genre(self):
+        """Create a string for the Genre. This is required to display genre in Admin."""
+        return ', '.join(genre.name for genre in self.genre.all()[:3])
+
+    display_genre.short_description = 'Genre'
 
     def __str__(self):
         """String for representing the Model object."""
