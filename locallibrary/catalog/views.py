@@ -1,7 +1,3 @@
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from .models import Author
-from .models import Book
-from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from catalog.forms import RenewBookForm
 from django.contrib.auth.decorators import login_required, permission_required
@@ -9,6 +5,10 @@ import datetime
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from .models import Author
+from .models import Book
+from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from django.shortcuts import render
@@ -92,6 +92,7 @@ class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
             .order_by('due_back')
             #           BookInstance.objects.filter(borrower=self.request.user)
         )
+
 
 # Added as part of challenge!
 
