@@ -93,7 +93,11 @@ class LoanedBookInstancesByUserListViewTest(TestCase):
         number_of_book_copies = 30
         for book_copy in range(number_of_book_copies):
             return_date = timezone.localtime() + datetime.timedelta(days=book_copy % 5)
-            the_borrower = test_user1 if book_copy % 2 else test_user2
+        #    the_borrower = test_user1 if book_copy % 2 else test_user2
+            if book_copy % 2:
+                the_borrower = test_user1
+            else:
+                the_borrower = test_user2
             status = 'm'
             BookInstance.objects.create(
                 book=test_book,
@@ -154,8 +158,29 @@ class LoanedBookInstancesByUserListViewTest(TestCase):
 
         # Confirm all books belong to testuser1 and are on loan
         for bookitem in response.context['bookinstance_list']:
-            #            self.assertEqual(response.context['user'], bookitem.borrower)
+            self.assertEqual(response.context['user'], bookitem.borrower)
             self.assertEqual(bookitem.status, 'o')
+
+    def test_pages_paginated_to_ten(self):
+
+        # Change all books to be on loan.
+        # This should make 15 test user ones.
+        for copy in BookInstance.objects.all():
+            copy.status = 'o'
+            copy.save()
+
+        login = self.client.login(
+            username='testuser1', password='1X<ISRUkw+tuK')
+        response = self.client.get(reverse('my-borrowed'))
+
+        # Check our user is logged in
+        self.assertEqual(str(response.context['user']), 'testuser1')
+        # Check that we got a response "success"
+        self.assertEqual(response.status_code, 200)
+
+        # Confirm that only 10 items are displayed due to pagination
+        # (if pagination not enabled, there would be 15 returned)
+        self.assertEqual(len(response.context['bookinstance_list']), 10)
 
     def test_pages_ordered_by_due_date(self):
         # Change all books to be on loan
@@ -181,7 +206,6 @@ class LoanedBookInstancesByUserListViewTest(TestCase):
                 last_date = book.due_back
             else:
                 self.assertTrue(last_date <= book.due_back)
-                last_date = book.due_back
 
 
 class RenewBookInstancesViewTest(TestCase):
@@ -307,9 +331,9 @@ class RenewBookInstancesViewTest(TestCase):
         valid_date_in_future = datetime.date.today() + datetime.timedelta(weeks=2)
         response = self.client.post(reverse('renew-book-librarian',
                                             kwargs={'pk': self.test_bookinstance1.pk, }),
-                                    {'renewal_date': valid_date_in_future}, follow=True)
-        self.assertRedirects(response, '/catalog/')
-#        self.assertRedirects(response, reverse('all-borrowed'))
+                                    {'renewal_date': valid_date_in_future})
+#        self.assertRedirects(response, '/catalog/')
+        self.assertRedirects(response, reverse('all-borrowed'))
 
     def test_form_invalid_renewal_date_past(self):
         login = self.client.login(

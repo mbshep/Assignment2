@@ -17,6 +17,7 @@ class BooksInline(admin.TabularInline):
     model = Book
 
 
+@admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('last_name', 'first_name', 'date_of_birth',
                     'date_of_death')
@@ -29,9 +30,6 @@ class BooksInstanceInline(admin.TabularInline):
     """Defines format of inline book instance insertion (used in BookAdmin)"""
     model = BookInstance
 
-
-# Register the admin class with the associated model
-admin.site.register(Author, AuthorAdmin)
 
 # Register the Admin classes for Book using the decorator
 
